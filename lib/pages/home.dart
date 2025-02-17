@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<CameraDescription> cameras = [];
   CameraController? cameraController;
+  CameraDescription? _backCamera;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -47,15 +48,56 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         child: CircularProgressIndicator(),
       );
     }
-    return SafeArea(
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xff4D8EFF),
+            Color(0xffFFFFFF),
+          ],
+        ),
+      ),
       child: SizedBox.expand(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              height: MediaQuery.sizeOf(context).height * 0.3,
+            Padding(
+              padding: EdgeInsets.only(
+                left: 40,
+                right: 40,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'PicOne',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    'Capture the moment!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              height: MediaQuery.sizeOf(context).height * 0.6,
               width: MediaQuery.sizeOf(context).width * 0.8,
+              clipBehavior: Clip.hardEdge,
               child: CameraPreview(
                 cameraController!,
               ),
@@ -73,10 +115,24 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   ),
                 );
               },
-              iconSize: 100,
-              icon: const Icon(
-                Icons.camera,
-                color: Colors.red,
+              icon: Container(
+                width: 85,
+                height: 85,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                        color: Color.fromRGBO(29, 22, 23, 0.11),
+                        blurRadius: 10,
+                        spreadRadius: 1.0
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(15),
+                child: Image.asset(
+                  'assets/camera.png',
+                ),
               ),
             ),
           ],
@@ -85,15 +141,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-
-
   Future<void> _setupCameraController() async {
     List<CameraDescription> checkCameras = await availableCameras();
     if (checkCameras.isNotEmpty) {
       setState(() {
         cameras = checkCameras;
+        _backCamera = cameras.firstWhere(
+          (camera) => camera.lensDirection == CameraLensDirection.back,
+          orElse: () => cameras.first, // Fallback to first camera if no back camera
+        );
         cameraController = CameraController(
-            checkCameras.last,
+            _backCamera!,
             ResolutionPreset.high
         );
       });
@@ -118,8 +176,30 @@ class DisplayPictureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context){
     return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
-      body: Image.file(File(imagePath)),
+      appBar: AppBar(
+        title: const Text(
+            'Picture Taken',
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(50),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                  color: Color.fromRGBO(29, 22, 23, 0.11),
+                  blurRadius: 10,
+                  spreadRadius: 1.0
+              ),
+            ],
+          ),
+          clipBehavior: Clip.hardEdge,
+          child: Image.file(
+            File(imagePath),
+          ),
+        ),
+      ),
     );
   }
 }
