@@ -104,6 +104,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
             IconButton(
               onPressed: () async {
+                await cameraController!.setFlashMode(FlashMode.off);
                 XFile picture = await cameraController!.takePicture();
 
                 await Navigator.of(context).push(
